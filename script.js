@@ -1,6 +1,6 @@
 const academicPolicy = `前提: 学生本人が考えてレポートを書くための支援として答えてください。完成文をそのまま提出できる形で代筆するのではなく、考え方、構成、改善点、確認すべき観点を中心に示してください。事実情報や引用は必ず信頼できる資料で確認するよう促してください。`;
 
-const builtInTemplates = [
+const legacyTemplates = [
   {
     id: "topic-narrow",
     category: "topic",
@@ -548,6 +548,311 @@ ${v.reason}
 3. 他に考えられる可能性
 4. 画像だけでは判断できない点
 5. レポートでは断定せずに書くための表現例`
+  }
+];
+
+const builtInTemplates = [
+  {
+    id: "decide-topic-question",
+    category: "decide",
+    title: "テーマ・問いを決める",
+    description: "テーマ案、問い、仮説をまとめて整理します。",
+    tags: ["テーマ", "問い", "仮説"],
+    fields: [
+      { id: "className", label: "授業名・分野", type: "input", placeholder: "例: 情報社会論、心理学、日本史" },
+      { id: "interest", label: "気になっていること", type: "textarea", placeholder: "例: 生成AIと大学生の学習、SNSと孤独感" },
+      { id: "currentIdea", label: "今の自分の考え", type: "textarea", placeholder: "例: AIは便利だが、丸写しになる危険もあると思う" },
+      { id: "rules", label: "条件・文字数", type: "input", placeholder: "例: 2000字、授業資料を1つ以上使う" }
+    ],
+    build: (v) => `${academicPolicy}
+${v.tone}、${v.length}
+
+次の情報をもとに、レポートのテーマ、問い、仮説を一緒に整理してください。
+
+授業名・分野: ${v.className}
+気になっていること:
+${v.interest}
+
+今の自分の考え:
+${v.currentIdea}
+
+条件・文字数: ${v.rules}
+
+出力してほしいこと:
+1. レポートで扱いやすいテーマ案を3つ
+2. それぞれの問い
+3. 仮説や主張の方向
+4. 調べやすさと注意点
+5. 一番おすすめの進め方`
+  },
+  {
+    id: "decide-outline",
+    category: "decide",
+    title: "構成を決める",
+    description: "序論・本論・結論と段落の流れをまとめて作ります。",
+    tags: ["構成", "段落", "流れ"],
+    fields: [
+      { id: "topic", label: "テーマ・仮タイトル", type: "input", placeholder: "例: 生成AIが大学生の学習に与える影響" },
+      { id: "question", label: "レポートの問い", type: "textarea", placeholder: "例: 生成AIは学習の理解を深めるのか、それとも妨げるのか" },
+      { id: "claim", label: "今の主張・結論の方向", type: "textarea", placeholder: "例: 適切な使い方なら理解を助けるが、使い方のルールが必要" },
+      { id: "wordCount", label: "文字数・条件", type: "input", placeholder: "例: 1600字、3000字、参考文献2つ以上" }
+    ],
+    build: (v) => `${academicPolicy}
+${v.tone}、${v.length}
+
+次の内容で、学生レポートの大まかな構成を作ってください。
+
+テーマ・仮タイトル: ${v.topic}
+レポートの問い:
+${v.question}
+
+今の主張・結論の方向:
+${v.claim}
+
+文字数・条件: ${v.wordCount}
+
+出力してほしいこと:
+1. 序論・本論・結論の流れ
+2. 段落ごとの役割
+3. どこに根拠や資料を入れるか
+4. 論理が弱くなりやすい点
+5. 書き始める前のチェックリスト`
+  },
+  {
+    id: "research-sources",
+    category: "research",
+    title: "資料を探す・整理する",
+    description: "検索キーワード、資料メモ、使い方をまとめて相談します。",
+    tags: ["資料", "検索", "メモ"],
+    fields: [
+      { id: "topic", label: "レポートテーマ", type: "textarea", placeholder: "例: SNS利用と大学生の孤独感の関係" },
+      { id: "sourceType", label: "探したい資料", type: "input", placeholder: "例: 論文、白書、新聞記事、授業資料" },
+      { id: "knownInfo", label: "すでに分かっていること・メモ", type: "textarea", placeholder: "例: 授業資料ではSNSの利用時間が増えていると説明されていた" },
+      { id: "need", label: "資料で確かめたいこと", type: "textarea", placeholder: "例: SNS利用時間と孤独感に関係があるかを知りたい" }
+    ],
+    build: (v) => `${academicPolicy}
+${v.tone}、${v.length}
+
+次のレポートテーマについて、資料探しと資料メモの整理を手伝ってください。
+
+レポートテーマ:
+${v.topic}
+
+探したい資料: ${v.sourceType}
+
+すでに分かっていること・メモ:
+${v.knownInfo}
+
+資料で確かめたいこと:
+${v.need}
+
+出力してほしいこと:
+1. 検索キーワード
+2. 信頼できる資料を見分ける観点
+3. 読んだ資料でメモすべき項目
+4. レポートの根拠として使う方法
+5. 追加で確認すべきこと`
+  },
+  {
+    id: "research-citation",
+    category: "research",
+    title: "引用・参考文献を確認する",
+    description: "引用、要約、参考文献、出典の不足を確認します。",
+    tags: ["引用", "参考文献", "出典"],
+    fields: [
+      { id: "sourceInfo", label: "資料情報", type: "textarea", placeholder: "例: 著者、タイトル、URL、公開年、出版社など" },
+      { id: "useText", label: "レポート内で使いたい内容", type: "textarea", placeholder: "例: この調査では大学生のAI利用率が高いと述べられている" },
+      { id: "style", label: "指定された形式", type: "input", placeholder: "例: 指定なし、APA風、先生の指定フォーマット" }
+    ],
+    build: (v) => `${academicPolicy}
+${v.tone}、${v.length}
+
+次の資料をレポートで使うとき、引用・要約・参考文献の扱いを確認してください。
+
+資料情報:
+${v.sourceInfo}
+
+レポート内で使いたい内容:
+${v.useText}
+
+指定された形式: ${v.style}
+
+出力してほしいこと:
+1. 直接引用と要約のどちらが向いているか
+2. 引用するときの注意点
+3. 参考文献に必要な情報
+4. 不足している情報
+5. 授業指示で最終確認すべきこと`
+  },
+  {
+    id: "write-draft",
+    category: "write",
+    title: "下書きの流れを作る",
+    description: "序論・本論・結論で何を書くかをまとめて相談します。",
+    tags: ["下書き", "序論", "本論"],
+    fields: [
+      { id: "topic", label: "テーマ", type: "input", placeholder: "例: 大学生の生成AI利用" },
+      { id: "question", label: "問い", type: "textarea", placeholder: "例: 生成AIは大学生の学習にどのような影響を与えるのか" },
+      { id: "points", label: "入れたい内容・根拠", type: "textarea", placeholder: "例: メリット、リスク、授業資料、アンケート結果" },
+      { id: "concern", label: "書くときに不安な点", type: "textarea", placeholder: "例: 書き出しが思いつかない、結論が弱い" }
+    ],
+    build: (v) => `${academicPolicy}
+${v.tone}、${v.length}
+
+次の情報をもとに、レポートの下書きを進めるための流れを作ってください。
+
+テーマ: ${v.topic}
+問い:
+${v.question}
+
+入れたい内容・根拠:
+${v.points}
+
+書くときに不安な点:
+${v.concern}
+
+出力してほしいこと:
+1. 序論に入れる内容
+2. 本論で述べる順番
+3. 結論で答えること
+4. 自分で文章化するための段落メモ
+5. そのまま提出する文章ではなく、書くための骨組み`
+  },
+  {
+    id: "review-report",
+    category: "review",
+    title: "レポートを見直す",
+    description: "論理、根拠、表現、評価基準とのズレをまとめて確認します。",
+    tags: ["添削", "論理", "確認"],
+    fields: [
+      { id: "draft", label: "見直したい文章", type: "textarea", placeholder: "ここにレポート本文や段落を貼り付けます" },
+      { id: "rubric", label: "評価基準・先生の指示", type: "textarea", placeholder: "例: 授業内容を踏まえる、参考文献を2つ以上使う" },
+      { id: "concern", label: "不安な点", type: "textarea", placeholder: "例: 主張が弱い、話し言葉っぽい、根拠が足りない" }
+    ],
+    build: (v) => `${academicPolicy}
+${v.tone}、${v.length}
+
+次のレポート文を見直してください。完成文の代筆ではなく、改善点と修正の考え方を示してください。
+
+見直したい文章:
+${v.draft}
+
+評価基準・先生の指示:
+${v.rubric}
+
+不安な点:
+${v.concern}
+
+出力してほしいこと:
+1. 良い点
+2. 論理や根拠が弱い箇所
+3. レポートらしくない表現
+4. 修正例
+5. 提出前チェックリスト`
+  },
+  {
+    id: "review-final",
+    category: "review",
+    title: "提出前に確認する",
+    description: "AI利用、引用、条件、最終チェックをまとめて確認します。",
+    tags: ["提出前", "AI利用", "最終確認"],
+    fields: [
+      { id: "rules", label: "授業のルール・提出条件", type: "textarea", placeholder: "例: AI利用可、利用した場合は明記、参考文献2つ以上" },
+      { id: "usedFor", label: "AIを使った作業", type: "textarea", placeholder: "例: テーマ案、構成相談、文章の添削" },
+      { id: "done", label: "自分で行った作業", type: "textarea", placeholder: "例: 資料を読んだ、主張を決めた、本文を書いた" }
+    ],
+    build: (v) => `${academicPolicy}
+${v.tone}、${v.length}
+
+レポート提出前に、ルールやAI利用範囲を確認したいです。
+
+授業のルール・提出条件:
+${v.rules}
+
+AIを使った作業:
+${v.usedFor}
+
+自分で行った作業:
+${v.done}
+
+出力してほしいこと:
+1. 提出前に確認すべき項目
+2. AI利用として明記した方がよい範囲
+3. 先生に確認すべき点
+4. AI利用の説明文の例
+5. ルールが不明な場合の安全な対応`
+  },
+  {
+    id: "image-read",
+    category: "image",
+    title: "画像を読み取る",
+    description: "写真、資料、板書などを見て、観察点や判別結果を整理します。",
+    tags: ["画像", "観察", "判別"],
+    fields: [
+      { id: "imageFile", label: "AIに見せたい画像", type: "image", placeholder: "画像を選択" },
+      { id: "reportTopic", label: "レポートテーマ", type: "textarea", placeholder: "例: 街中のバリアフリー設備について" },
+      { id: "focus", label: "特に見てほしい点", type: "textarea", placeholder: "例: 何が写っているか、状態、問題点、読み取れる文字" },
+      { id: "context", label: "画像の状況", type: "textarea", placeholder: "例: 駅の入口付近で撮影。授業のフィールドワークで使う。" }
+    ],
+    build: (v) => `${academicPolicy}
+${v.tone}、${v.length}
+
+この質問文と一緒に画像を添付します。添付画像を見て、レポート作成に使える観察点を整理してください。
+
+画像情報:
+${v.imageFile}
+
+レポートテーマ:
+${v.reportTopic}
+
+特に見てほしい点:
+${v.focus}
+
+画像の状況:
+${v.context}
+
+出力してほしいこと:
+1. 画像から確認できる事実
+2. 判別できそうなこと
+3. 画像だけでは断定できないこと
+4. レポートで使えそうな観察メモ
+5. 追加で確認・撮影・調査すべき点`
+  },
+  {
+    id: "image-chart",
+    category: "image",
+    title: "グラフ・表を読み取る",
+    description: "グラフや表の画像から、傾向や根拠を整理します。",
+    tags: ["グラフ", "表", "数値"],
+    fields: [
+      { id: "imageFile", label: "グラフ・表の画像", type: "image", placeholder: "画像を選択" },
+      { id: "reportQuestion", label: "レポートの問い", type: "textarea", placeholder: "例: 若者のSNS利用時間は生活習慣に影響しているのか" },
+      { id: "chartInfo", label: "分かっている情報", type: "textarea", placeholder: "例: 総務省の資料、年代別の比較、調査年" },
+      { id: "need", label: "読み取りたいこと", type: "textarea", placeholder: "例: 一番大きい差、増減傾向、レポートで使える根拠" }
+    ],
+    build: (v) => `${academicPolicy}
+${v.tone}、${v.length}
+
+この質問文と一緒にグラフまたは表の画像を添付します。添付画像を読み取り、レポートで使える形に整理してください。
+
+画像情報:
+${v.imageFile}
+
+レポートの問い:
+${v.reportQuestion}
+
+分かっている情報:
+${v.chartInfo}
+
+読み取りたいこと:
+${v.need}
+
+出力してほしいこと:
+1. グラフ・表から読み取れる主な傾向
+2. 数値や比較で注目すべき点
+3. レポートの根拠として使えそうな内容
+4. 読み取りで注意すべき限界
+5. 出典や元データで確認すべきこと`
   }
 ];
 
