@@ -406,6 +406,148 @@ ${v.rule}
 3. 先生に確認すべき点
 4. AI利用の説明文の例
 5. ルールが不明な場合の安全な対応`
+  },
+  {
+    id: "image-observation",
+    category: "image",
+    title: "画像から情報を読み取る",
+    description: "写真や図をAIに見てもらい、レポートに使える観察点を整理します。",
+    tags: ["画像", "観察", "判別"],
+    fields: [
+      { id: "imageFile", label: "AIに見せたい画像", type: "image", placeholder: "画像を選択" },
+      { id: "reportTopic", label: "レポートテーマ", type: "textarea", placeholder: "例: 街中のバリアフリー設備について" },
+      { id: "focus", label: "特に見てほしい点", type: "textarea", placeholder: "例: 設備の種類、利用しやすさ、問題点" },
+      { id: "context", label: "画像の状況", type: "textarea", placeholder: "例: 駅の入口付近で撮影した写真。授業のフィールドワークで使う。" }
+    ],
+    build: (v) => `${academicPolicy}
+${v.tone}、${v.length}
+
+この質問文と一緒に画像を添付します。添付画像を見て、レポート作成に使える観察点を整理してください。
+
+画像情報:
+${v.imageFile}
+
+レポートテーマ:
+${v.reportTopic}
+
+特に見てほしい点:
+${v.focus}
+
+画像の状況:
+${v.context}
+
+出力してほしいこと:
+1. 画像から確認できる事実
+2. 判別できそうなこと
+3. 画像だけでは断定できないこと
+4. レポートで使えそうな観察メモ
+5. 追加で確認・撮影・調査すべき点`
+  },
+  {
+    id: "chart-image-analysis",
+    category: "image",
+    title: "グラフ画像を読み取る",
+    description: "グラフや表の画像から、傾向や注意点を整理します。",
+    tags: ["グラフ", "表", "読み取り"],
+    fields: [
+      { id: "imageFile", label: "グラフ・表の画像", type: "image", placeholder: "画像を選択" },
+      { id: "reportQuestion", label: "レポートの問い", type: "textarea", placeholder: "例: 若者のSNS利用時間は生活習慣に影響しているのか" },
+      { id: "chartInfo", label: "分かっている情報", type: "textarea", placeholder: "例: 総務省の資料、2025年の調査、年代別の比較" },
+      { id: "need", label: "読み取りたいこと", type: "textarea", placeholder: "例: 一番大きい差、増減傾向、レポートで使える根拠" }
+    ],
+    build: (v) => `${academicPolicy}
+${v.tone}、${v.length}
+
+この質問文と一緒にグラフまたは表の画像を添付します。添付画像を読み取り、レポートで使える形に整理してください。
+
+画像情報:
+${v.imageFile}
+
+レポートの問い:
+${v.reportQuestion}
+
+分かっている情報:
+${v.chartInfo}
+
+読み取りたいこと:
+${v.need}
+
+出力してほしいこと:
+1. グラフ・表から読み取れる主な傾向
+2. 数値や比較で注目すべき点
+3. レポートの根拠として使えそうな内容
+4. 読み取りで注意すべき限界
+5. 出典や元データで確認すべきこと`
+  },
+  {
+    id: "document-image-notes",
+    category: "image",
+    title: "資料画像をメモ化する",
+    description: "プリント、板書、スクリーン画像をレポート用メモにします。",
+    tags: ["資料画像", "板書", "メモ"],
+    fields: [
+      { id: "imageFile", label: "資料・板書の画像", type: "image", placeholder: "画像を選択" },
+      { id: "className", label: "授業名・分野", type: "input", placeholder: "例: 情報社会論" },
+      { id: "purpose", label: "この資料を使う目的", type: "textarea", placeholder: "例: 授業で扱ったAI活用の注意点をレポートに入れたい" },
+      { id: "knownText", label: "読み取れている文字・内容", type: "textarea", placeholder: "例: 自分で読める範囲のキーワードやメモ" }
+    ],
+    build: (v) => `${academicPolicy}
+${v.tone}、${v.length}
+
+この質問文と一緒に資料画像を添付します。画像内の文字や内容を確認し、レポート作成用のメモに整理してください。
+
+画像情報:
+${v.imageFile}
+
+授業名・分野: ${v.className}
+
+この資料を使う目的:
+${v.purpose}
+
+自分で読み取れている文字・内容:
+${v.knownText}
+
+出力してほしいこと:
+1. 画像から読み取れる内容
+2. レポートで使えそうなキーワード
+3. 授業内容とのつなげ方
+4. 読み取りが不確かな部分
+5. 必ず元資料で確認すべき点`
+  },
+  {
+    id: "image-classification",
+    category: "image",
+    title: "画像の種類や状態を判別する",
+    description: "対象物や状態をAIに見分けてもらうための質問文を作ります。",
+    tags: ["分類", "状態", "判別"],
+    fields: [
+      { id: "imageFile", label: "判別したい画像", type: "image", placeholder: "画像を選択" },
+      { id: "target", label: "判別したいもの", type: "input", placeholder: "例: 植物の種類、機械の状態、掲示物の内容" },
+      { id: "choices", label: "候補・分類したい種類", type: "textarea", placeholder: "例: 正常/異常、Aタイプ/Bタイプ、危険/安全" },
+      { id: "reason", label: "判別結果を何に使うか", type: "textarea", placeholder: "例: レポートの観察結果として使う。断定ではなく可能性として整理したい。" }
+    ],
+    build: (v) => `${academicPolicy}
+${v.tone}、${v.length}
+
+この質問文と一緒に画像を添付します。添付画像を見て、対象の種類や状態を判別してください。
+
+画像情報:
+${v.imageFile}
+
+判別したいもの: ${v.target}
+
+候補・分類したい種類:
+${v.choices}
+
+判別結果を使う目的:
+${v.reason}
+
+出力してほしいこと:
+1. 最も可能性が高い判別結果
+2. そう考える理由
+3. 他に考えられる可能性
+4. 画像だけでは判断できない点
+5. レポートでは断定せずに書くための表現例`
   }
 ];
 
@@ -507,14 +649,30 @@ function renderFields() {
   dynamicFields.innerHTML = "";
 
   template.fields.forEach((field) => {
-    const block = document.createElement("label");
+    const block = document.createElement(field.type === "image" ? "div" : "label");
     block.className = "field-block";
+    if (field.type === "image") {
+      block.innerHTML = `
+        <span class="field-label">${escapeHtml(field.label)}</span>
+        <input class="image-input" type="file" accept="image/*" data-field="${escapeHtml(field.id)}" data-image-input />
+        <div class="image-preview is-empty" data-image-preview>
+          <span>画像を選ぶとここにプレビューが表示されます。</span>
+        </div>
+      `;
+      dynamicFields.append(block);
+      return;
+    }
+
     const inputTag = field.type === "textarea" ? "textarea" : "input";
     block.innerHTML = `
       <span class="field-label">${escapeHtml(field.label)}</span>
       <${inputTag} class="text-field" data-field="${escapeHtml(field.id)}" placeholder="${escapeHtml(field.placeholder || "")}"></${inputTag}>
     `;
     dynamicFields.append(block);
+  });
+
+  dynamicFields.querySelectorAll("[data-image-input]").forEach((input) => {
+    input.addEventListener("change", handleImageSelection);
   });
 }
 
@@ -525,6 +683,11 @@ function collectValues() {
   };
 
   dynamicFields.querySelectorAll("[data-field]").forEach((field) => {
+    if (field.type === "file") {
+      values[field.dataset.field] = field.dataset.imageInfo || "画像未選択";
+      return;
+    }
+
     values[field.dataset.field] = field.value.trim() || "未入力";
   });
 
@@ -589,10 +752,52 @@ document.querySelector("#copyButton").addEventListener("click", async () => {
 document.querySelector("#clearButton").addEventListener("click", () => {
   dynamicFields.querySelectorAll("[data-field]").forEach((field) => {
     field.value = "";
+    if (field.type === "file") {
+      field.dataset.imageInfo = "";
+    }
   });
+  resetImagePreviews();
   updateOutput();
   copyStatus.textContent = "";
 });
+
+function handleImageSelection(event) {
+  const input = event.currentTarget;
+  const file = input.files && input.files[0];
+  const preview = input.closest(".field-block").querySelector("[data-image-preview]");
+
+  if (!file) {
+    input.dataset.imageInfo = "";
+    preview.className = "image-preview is-empty";
+    preview.innerHTML = "<span>画像を選ぶとここにプレビューが表示されます。</span>";
+    updateOutput();
+    return;
+  }
+
+  const reader = new FileReader();
+  reader.addEventListener("load", () => {
+    const image = new Image();
+    image.addEventListener("load", () => {
+      const sizeKb = Math.max(1, Math.round(file.size / 1024));
+      input.dataset.imageInfo = `添付予定の画像: ${file.name}（${image.naturalWidth}x${image.naturalHeight}px、約${sizeKb}KB）`;
+      preview.className = "image-preview";
+      preview.innerHTML = `
+        <img src="${reader.result}" alt="選択した画像のプレビュー" />
+        <p>${escapeHtml(file.name)} / ${image.naturalWidth}x${image.naturalHeight}px</p>
+      `;
+      updateOutput();
+    });
+    image.src = reader.result;
+  });
+  reader.readAsDataURL(file);
+}
+
+function resetImagePreviews() {
+  dynamicFields.querySelectorAll("[data-image-preview]").forEach((preview) => {
+    preview.className = "image-preview is-empty";
+    preview.innerHTML = "<span>画像を選ぶとここにプレビューが表示されます。</span>";
+  });
+}
 
 customTemplateForm.addEventListener("submit", (event) => {
   event.preventDefault();
