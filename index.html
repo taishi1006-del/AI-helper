@@ -84,6 +84,7 @@
                 <h2>AIに質問する文章</h2>
               </div>
               <div class="actions">
+                <button id="saveHistoryButton" class="save-button" type="button">履歴に保存</button>
                 <button id="copyButton" class="icon-button" type="button" title="コピー" aria-label="コピー">
                   <span aria-hidden="true">⧉</span>
                 </button>
@@ -95,6 +96,18 @@
             <textarea id="promptOutput" class="prompt-output" readonly></textarea>
             <p id="copyStatus" class="copy-status" role="status" aria-live="polite"></p>
           </div>
+
+          <section class="history-panel" aria-label="作成した文章の履歴">
+            <div class="history-header">
+              <div>
+                <p class="eyebrow">History</p>
+                <h2>作った文章の履歴</h2>
+              </div>
+              <button id="clearHistoryButton" class="text-button" type="button">履歴をすべて削除</button>
+            </div>
+            <p class="history-help">よく使う質問文や、あとで見返したい文章をこのブラウザに保存できます。</p>
+            <div id="historyList" class="history-list"></div>
+          </section>
         </section>
       </section>
     </main>

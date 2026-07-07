@@ -862,6 +862,9 @@ const state = {
   query: ""
 };
 
+const HISTORY_STORAGE_KEY = "reportAiSupporterPromptHistory";
+const HISTORY_LIMIT = 30;
+
 const templateList = document.querySelector("#templateList");
 const dynamicFields = document.querySelector("#dynamicFields");
 const selectedTitle = document.querySelector("#selectedTitle");
@@ -870,6 +873,11 @@ const toneSelect = document.querySelector("#toneSelect");
 const lengthSelect = document.querySelector("#lengthSelect");
 const searchInput = document.querySelector("#templateSearch");
 const copyStatus = document.querySelector("#copyStatus");
+const historyList = document.querySelector("#historyList");
+const saveHistoryButton = document.querySelector("#saveHistoryButton");
+const clearHistoryButton = document.querySelector("#clearHistoryButton");
+
+let promptHistory = loadPromptHistory();
 
 function getTemplates() {
   return builtInTemplates;
@@ -882,6 +890,88 @@ function escapeHtml(value) {
     .replace(/>/g, "&gt;")
     .replace(/"/g, "&quot;")
     .replace(/'/g, "&#039;");
+}
+
+function loadPromptHistory() {
+  try {
+    const rawHistory = localStorage.getItem(HISTORY_STORAGE_KEY);
+    if (!rawHistory) return [];
+
+    const parsedHistory = JSON.parse(rawHistory);
+    if (!Array.isArray(parsedHistory)) return [];
+
+    return parsedHistory
+      .filter((item) => item && typeof item.text === "string")
+      .slice(0, HISTORY_LIMIT);
+  } catch {
+    return [];
+  }
+}
+
+function savePromptHistory() {
+  try {
+    localStorage.setItem(HISTORY_STORAGE_KEY, JSON.stringify(promptHistory));
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+function createHistoryId() {
+  return `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+}
+
+function formatHistoryDate(value) {
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "日時不明";
+
+  return new Intl.DateTimeFormat("ja-JP", {
+    dateStyle: "medium",
+    timeStyle: "short"
+  }).format(date);
+}
+
+function makeHistoryPreview(text) {
+  const normalizedText = String(text).trim().replace(/\n{3,}/g, "\n\n");
+  return normalizedText.length > 180 ? `${normalizedText.slice(0, 180)}...` : normalizedText;
+}
+
+function renderHistory() {
+  historyList.innerHTML = "";
+  clearHistoryButton.disabled = promptHistory.length === 0;
+
+  if (promptHistory.length === 0) {
+    const empty = document.createElement("p");
+    empty.className = "empty-state";
+    empty.textContent = "まだ履歴はありません。作った文章を保存するとここに表示されます。";
+    historyList.append(empty);
+    return;
+  }
+
+  promptHistory.forEach((item) => {
+    const card = document.createElement("article");
+    const safeId = escapeHtml(item.id);
+    const safeTitle = escapeHtml(item.templateTitle || "保存した文章");
+    const safeDate = escapeHtml(formatHistoryDate(item.createdAt));
+    const safePreview = escapeHtml(makeHistoryPreview(item.text));
+
+    card.className = "history-card";
+    card.innerHTML = `
+      <div class="history-card-head">
+        <div>
+          <h3>${safeTitle}</h3>
+          <p class="history-date">${safeDate}</p>
+        </div>
+      </div>
+      <p class="history-preview">${safePreview}</p>
+      <div class="history-actions">
+        <button class="history-action" type="button" data-history-action="load" data-history-id="${safeId}">表示</button>
+        <button class="history-action" type="button" data-history-action="copy" data-history-id="${safeId}">コピー</button>
+        <button class="history-action is-danger" type="button" data-history-action="delete" data-history-id="${safeId}">削除</button>
+      </div>
+    `;
+    historyList.append(card);
+  });
 }
 
 function getSelectedTemplate() {
@@ -978,6 +1068,91 @@ function updateOutput() {
   output.value = template.build(collectValues());
 }
 
+async function copyTextToClipboard(text) {
+  try {
+    if (navigator.clipboard) {
+      await navigator.clipboard.writeText(text);
+      return true;
+    }
+  } catch {
+    // Fall back to a temporary textarea for local file usage.
+  }
+
+  const temporaryTextarea = document.createElement("textarea");
+  temporaryTextarea.value = text;
+  temporaryTextarea.setAttribute("readonly", "");
+  temporaryTextarea.style.position = "fixed";
+  temporaryTextarea.style.opacity = "0";
+  document.body.append(temporaryTextarea);
+  temporaryTextarea.select();
+  const copied = document.execCommand("copy");
+  temporaryTextarea.remove();
+  return copied;
+}
+
+function saveCurrentPromptToHistory() {
+  const text = output.value.trim();
+  if (!text) {
+    copyStatus.textContent = "保存する文章がありません。";
+    return;
+  }
+
+  if (promptHistory[0] && promptHistory[0].text === text) {
+    copyStatus.textContent = "同じ文章はすでに履歴の先頭にあります。";
+    return;
+  }
+
+  const template = getSelectedTemplate();
+  promptHistory.unshift({
+    id: createHistoryId(),
+    templateId: template.id,
+    templateTitle: template.title,
+    text,
+    createdAt: new Date().toISOString()
+  });
+  promptHistory = promptHistory.slice(0, HISTORY_LIMIT);
+
+  if (!savePromptHistory()) {
+    copyStatus.textContent = "履歴を保存できませんでした。ブラウザ設定を確認してください。";
+    return;
+  }
+
+  renderHistory();
+  copyStatus.textContent = "履歴に保存しました。あとで下の履歴から見返せます。";
+}
+
+function findHistoryItem(id) {
+  return promptHistory.find((item) => item.id === id);
+}
+
+async function handleHistoryAction(event) {
+  const button = event.target.closest("[data-history-action]");
+  if (!button) return;
+
+  const item = findHistoryItem(button.dataset.historyId);
+  if (!item && button.dataset.historyAction !== "delete") return;
+
+  if (button.dataset.historyAction === "load") {
+    output.value = item.text;
+    copyStatus.textContent = "履歴の文章を表示しました。必要ならコピーして使えます。";
+    output.focus();
+    return;
+  }
+
+  if (button.dataset.historyAction === "copy") {
+    const copied = await copyTextToClipboard(item.text);
+    copyStatus.textContent = copied ? "履歴の文章をコピーしました。" : "コピーできませんでした。文章を表示してから手動でコピーしてください。";
+    return;
+  }
+
+  if (button.dataset.historyAction === "delete") {
+    promptHistory = promptHistory.filter((historyItem) => historyItem.id !== button.dataset.historyId);
+    savePromptHistory();
+    renderHistory();
+    copyStatus.textContent = "履歴から削除しました。";
+  }
+}
+
 function selectTemplate(id) {
   state.selectedId = id;
   renderTemplates();
@@ -1011,14 +1186,8 @@ toneSelect.addEventListener("change", updateOutput);
 lengthSelect.addEventListener("change", updateOutput);
 
 document.querySelector("#copyButton").addEventListener("click", async () => {
-  try {
-    await navigator.clipboard.writeText(output.value);
-    copyStatus.textContent = "コピーしました。AIの入力欄に貼り付けて使えます。";
-  } catch {
-    output.select();
-    document.execCommand("copy");
-    copyStatus.textContent = "コピーしました。";
-  }
+  const copied = await copyTextToClipboard(output.value);
+  copyStatus.textContent = copied ? "コピーしました。AIの入力欄に貼り付けて使えます。" : "コピーできませんでした。手動で選択してコピーしてください。";
 });
 
 document.querySelector("#clearButton").addEventListener("click", () => {
@@ -1032,6 +1201,22 @@ document.querySelector("#clearButton").addEventListener("click", () => {
   updateOutput();
   copyStatus.textContent = "";
 });
+
+saveHistoryButton.addEventListener("click", saveCurrentPromptToHistory);
+
+clearHistoryButton.addEventListener("click", () => {
+  if (promptHistory.length === 0) return;
+
+  const shouldClear = window.confirm("保存した履歴をすべて削除しますか？");
+  if (!shouldClear) return;
+
+  promptHistory = [];
+  savePromptHistory();
+  renderHistory();
+  copyStatus.textContent = "履歴をすべて削除しました。";
+});
+
+historyList.addEventListener("click", handleHistoryAction);
 
 function handleImageSelection(event) {
   const input = event.currentTarget;
@@ -1074,3 +1259,4 @@ function resetImagePreviews() {
 renderTemplates();
 renderFields();
 updateOutput();
+renderHistory();
