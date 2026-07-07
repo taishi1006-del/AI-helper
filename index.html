@@ -31,7 +31,38 @@
             <button class="category-button" type="button" data-category="study">学習</button>
             <button class="category-button" type="button" data-category="work">仕事</button>
             <button class="category-button" type="button" data-category="idea">アイデア</button>
+            <button class="category-button" type="button" data-category="custom">自作</button>
           </nav>
+
+          <form id="customTemplateForm" class="custom-template-form">
+            <div>
+              <p class="eyebrow">My Template</p>
+              <h2>自作テンプレート</h2>
+            </div>
+
+            <label class="field-block">
+              <span class="field-label">テンプレート名</span>
+              <input id="customTitle" class="text-field" type="text" placeholder="例: 面談相談文" />
+            </label>
+
+            <label class="field-block">
+              <span class="field-label">説明</span>
+              <input id="customDescription" class="text-field" type="text" placeholder="例: 先生に予定を相談する" />
+            </label>
+
+            <label class="field-block">
+              <span class="field-label">入力欄名</span>
+              <textarea id="customFields" class="text-field compact-textarea" placeholder="例: 相手&#10;目的&#10;希望日時"></textarea>
+            </label>
+
+            <label class="field-block">
+              <span class="field-label">AIへの指示文</span>
+              <textarea id="customInstruction" class="text-field compact-textarea" placeholder="例: 次の情報を使って、失礼のない相談文を作ってください。"></textarea>
+            </label>
+
+            <button class="primary-button" type="submit">保存</button>
+            <p id="customStatus" class="custom-status" role="status" aria-live="polite"></p>
+          </form>
         </aside>
 
         <section class="template-column" aria-label="テンプレート一覧">
