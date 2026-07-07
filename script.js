@@ -1,280 +1,411 @@
+const academicPolicy = `前提: 学生本人が考えてレポートを書くための支援として答えてください。完成文をそのまま提出できる形で代筆するのではなく、考え方、構成、改善点、確認すべき観点を中心に示してください。事実情報や引用は必ず信頼できる資料で確認するよう促してください。`;
+
 const builtInTemplates = [
   {
-    id: "email",
-    category: "writing",
-    title: "メール文を作る",
-    description: "相手に失礼なく、用件が伝わるメールを作ります。",
-    tags: ["連絡", "依頼", "返信"],
+    id: "topic-narrow",
+    category: "topic",
+    title: "テーマを絞る",
+    description: "広いテーマから、レポートで扱える問いへ小さくします。",
+    tags: ["テーマ", "問い", "焦点化"],
     fields: [
-      { id: "recipient", label: "相手", type: "input", placeholder: "例: 先生、上司、取引先の担当者" },
-      { id: "purpose", label: "伝えたいこと", type: "textarea", placeholder: "例: 面談の日程を相談したい" },
-      { id: "details", label: "入れたい情報", type: "textarea", placeholder: "例: 希望日は7月10日か11日、オンライン希望" }
+      { id: "className", label: "授業名・分野", type: "input", placeholder: "例: 情報社会論、心理学、日本史" },
+      { id: "broadTheme", label: "気になっているテーマ", type: "textarea", placeholder: "例: 生成AIと大学生の学習、SNSと孤独感" },
+      { id: "interest", label: "自分が特に気になる点", type: "textarea", placeholder: "例: 便利さだけでなく、学習力が下がる可能性も気になる" },
+      { id: "limits", label: "条件・文字数", type: "input", placeholder: "例: 2000字、授業資料を1つ以上使う" }
     ],
-    build: (v) => `あなたは文章作成の補助者です。
+    build: (v) => `${academicPolicy}
 ${v.tone}、${v.length}
 
-次の条件でメール文を作ってください。
-相手: ${v.recipient}
-伝えたいこと: ${v.purpose}
-入れたい情報: ${v.details}
+次の情報をもとに、学生レポートで扱いやすいテーマへ絞る相談に乗ってください。
 
-件名もあわせて提案してください。`
+授業名・分野: ${v.className}
+気になっているテーマ:
+${v.broadTheme}
+
+自分が特に気になる点:
+${v.interest}
+
+条件・文字数: ${v.limits}
+
+出力してほしいこと:
+1. レポート向きのテーマ案を5つ
+2. それぞれの「問い」の形
+3. 書きやすさ、調べやすさ、注意点
+4. 一番おすすめの案と理由`
   },
   {
-    id: "summary",
-    category: "study",
-    title: "文章を要約する",
-    description: "長い文章を読みやすく整理してもらう依頼文を作ります。",
-    tags: ["要約", "読解", "整理"],
+    id: "research-question",
+    category: "topic",
+    title: "問いと仮説を作る",
+    description: "レポートの中心になる問い、仮説、主張の候補を作ります。",
+    tags: ["問い", "仮説", "主張"],
     fields: [
-      { id: "text", label: "要約したい文章", type: "textarea", placeholder: "ここに文章を貼り付けます" },
-      { id: "goal", label: "要約の目的", type: "input", placeholder: "例: 授業の復習、会議内容の確認" }
+      { id: "topic", label: "選んだテーマ", type: "input", placeholder: "例: 生成AIは大学生の学習にどう影響するか" },
+      { id: "materials", label: "使えそうな資料・授業内容", type: "textarea", placeholder: "例: 第5回の授業資料、文科省の資料、ニュース記事" },
+      { id: "position", label: "今の自分の考え", type: "textarea", placeholder: "例: 使い方によっては理解を助けるが、丸写しは危険だと思う" }
     ],
-    build: (v) => `次の文章を要約してください。
+    build: (v) => `${academicPolicy}
 ${v.tone}、${v.length}
 
-要約の目的: ${v.goal}
+次のテーマについて、レポートの問いと仮説を一緒に整理してください。
 
-文章:
-${v.text}
+選んだテーマ: ${v.topic}
+使えそうな資料・授業内容:
+${v.materials}
 
-重要なポイントを箇条書きにして、最後に一言で結論を書いてください。`
+今の自分の考え:
+${v.position}
+
+出力してほしいこと:
+1. レポートの問いを3案
+2. それぞれの仮説
+3. 反対意見や別の見方
+4. どの資料を確認するとよいか
+5. 主張を強くしすぎない書き方の例`
   },
   {
-    id: "explain",
-    category: "study",
-    title: "わかりやすく説明してもらう",
-    description: "難しい言葉や仕組みを、初心者向けに説明してもらいます。",
-    tags: ["説明", "勉強", "初心者"],
+    id: "outline",
+    category: "outline",
+    title: "構成を作る",
+    description: "序論・本論・結論の流れを作ります。",
+    tags: ["構成", "序論", "本論"],
     fields: [
-      { id: "topic", label: "知りたいこと", type: "input", placeholder: "例: 生成AI、著作権、Excelの関数" },
-      { id: "level", label: "自分の理解度", type: "input", placeholder: "例: ほとんど知らない、名前だけ聞いたことがある" }
+      { id: "title", label: "仮タイトル", type: "input", placeholder: "例: 生成AIが大学生の学習に与える影響" },
+      { id: "question", label: "レポートの問い", type: "textarea", placeholder: "例: 生成AIは学習の理解を深めるのか、それとも妨げるのか" },
+      { id: "claim", label: "今の主張・結論の方向", type: "textarea", placeholder: "例: 適切な使い方なら理解を助けるが、使い方のルールが必要" },
+      { id: "wordCount", label: "文字数", type: "input", placeholder: "例: 1600字、3000字" }
     ],
-    build: (v) => `${v.topic}について説明してください。
+    build: (v) => `${academicPolicy}
 ${v.tone}、${v.length}
 
-私の理解度: ${v.level}
+次の内容で、学生レポートの構成案を作ってください。
 
-専門用語はできるだけ使わず、使う場合は意味も説明してください。
-最後に、覚えておくべきポイントを3つにまとめてください。`
+仮タイトル: ${v.title}
+レポートの問い:
+${v.question}
+
+今の主張・結論の方向:
+${v.claim}
+
+文字数: ${v.wordCount}
+
+出力してほしいこと:
+1. 序論・本論・結論の役割
+2. 各段落に書く内容
+3. 段落ごとの目安文字数
+4. 途中で入れるべき根拠や資料
+5. ありがちな脱線ポイント`
   },
   {
-    id: "idea",
-    category: "idea",
-    title: "アイデアを出す",
-    description: "企画、発表、制作物の案を広げます。",
-    tags: ["企画", "発想", "案出し"],
+    id: "paragraph-plan",
+    category: "outline",
+    title: "段落の役割を決める",
+    description: "各段落で何を言うか、論理の順番を整えます。",
+    tags: ["段落", "論理", "流れ"],
     fields: [
-      { id: "theme", label: "テーマ", type: "input", placeholder: "例: 学内イベント、AI活用、地域PR" },
-      { id: "audience", label: "対象者", type: "input", placeholder: "例: 大学生、初心者、地域の人" },
-      { id: "conditions", label: "条件", type: "textarea", placeholder: "例: 予算は少なめ、1週間で準備、5分発表" }
+      { id: "outline", label: "今の構成メモ", type: "textarea", placeholder: "例: 序論で問題提起、本論1でメリット、本論2でリスク..." },
+      { id: "weakPoint", label: "不安なところ", type: "textarea", placeholder: "例: 本論の順番が自然か、結論が弱い気がする" }
     ],
-    build: (v) => `${v.theme}について、アイデアを出してください。
+    build: (v) => `${academicPolicy}
 ${v.tone}、${v.length}
 
-対象者: ${v.audience}
-条件: ${v.conditions}
+次の構成メモを見て、段落ごとの役割と論理の流れを整理してください。
 
-実現しやすい案を5つ出し、それぞれの良い点と注意点も書いてください。`
+今の構成メモ:
+${v.outline}
+
+不安なところ:
+${v.weakPoint}
+
+出力してほしいこと:
+1. 段落ごとの役割
+2. 順番を入れ替えた方がよい箇所
+3. 足りない根拠
+4. つなぎの文で意識すること
+5. 改善後の構成案`
   },
   {
-    id: "plan",
-    category: "work",
-    title: "作業手順を作る",
-    description: "やることを順番に分け、迷わず進められる形にします。",
-    tags: ["手順", "計画", "タスク"],
+    id: "research-keywords",
+    category: "research",
+    title: "調査キーワードを作る",
+    description: "資料探しに使う検索語と調べる観点を出します。",
+    tags: ["調査", "検索", "資料"],
     fields: [
-      { id: "task", label: "やりたいこと", type: "input", placeholder: "例: アンケート結果をまとめる" },
-      { id: "deadline", label: "期限や目安", type: "input", placeholder: "例: 明日の17時まで、2時間以内" },
-      { id: "resources", label: "使えるもの", type: "textarea", placeholder: "例: Excel、資料、過去のメモ" }
+      { id: "topic", label: "調べたいテーマ", type: "textarea", placeholder: "例: SNS利用と大学生の孤独感の関係" },
+      { id: "sourceType", label: "探したい資料", type: "input", placeholder: "例: 論文、白書、新聞記事、授業資料" },
+      { id: "knownWords", label: "すでに知っている言葉", type: "textarea", placeholder: "例: ソーシャルメディア、孤独感、メンタルヘルス" }
     ],
-    build: (v) => `${v.task}を進めるための作業手順を作ってください。
+    build: (v) => `${academicPolicy}
 ${v.tone}、${v.length}
 
-期限や目安: ${v.deadline}
-使えるもの: ${v.resources}
+次のレポートテーマについて、資料探しのキーワードと調査観点を作ってください。
 
-最初に全体の流れを示し、そのあと具体的な手順を番号付きで書いてください。`
+調べたいテーマ:
+${v.topic}
+
+探したい資料: ${v.sourceType}
+すでに知っている言葉:
+${v.knownWords}
+
+出力してほしいこと:
+1. 日本語の検索キーワード
+2. 英語の検索キーワード
+3. 組み合わせ検索の例
+4. 信頼できる資料を見分ける観点
+5. 検索後にメモすべき項目`
   },
   {
-    id: "rewrite",
-    category: "correction",
-    title: "文章を直す",
-    description: "読みやすく、自然な表現に整えてもらいます。",
-    tags: ["推敲", "添削", "言い換え"],
+    id: "source-notes",
+    category: "research",
+    title: "資料メモを整理する",
+    description: "読んだ資料を、レポートに使いやすいメモへ整えます。",
+    tags: ["資料", "メモ", "要点"],
     fields: [
-      { id: "original", label: "直したい文章", type: "textarea", placeholder: "ここに文章を入力します" },
-      { id: "target", label: "誰に向けた文章か", type: "input", placeholder: "例: 先生、同級生、お客様" }
+      { id: "sourceInfo", label: "資料情報", type: "textarea", placeholder: "例: 著者、タイトル、公開年、URL、授業資料名" },
+      { id: "notes", label: "読んで分かったこと", type: "textarea", placeholder: "例: AI利用者は増えているが、学習目的によって効果が違う..." },
+      { id: "relation", label: "自分のテーマとの関係", type: "textarea", placeholder: "例: 生成AIのメリットとリスクの両方を説明する根拠に使えそう" }
     ],
-    build: (v) => `次の文章を読みやすく直してください。
+    build: (v) => `${academicPolicy}
 ${v.tone}、${v.length}
 
-誰に向けた文章か: ${v.target}
+次の資料メモを、レポートに使いやすい形へ整理してください。
 
-元の文章:
-${v.original}
+資料情報:
+${v.sourceInfo}
 
-直した文章のあとに、どこを改善したかも短く説明してください。`
+読んで分かったこと:
+${v.notes}
+
+自分のテーマとの関係:
+${v.relation}
+
+出力してほしいこと:
+1. 資料の要点
+2. レポートで使えそうな根拠
+3. 自分の主張とつなげる方法
+4. 追加で確認すべき点
+5. 引用するときに注意すること`
   },
   {
-    id: "proofread",
-    category: "correction",
-    title: "文章を添削する",
-    description: "誤字、わかりにくさ、言い回しをチェックしてもらいます。",
-    tags: ["添削", "誤字", "改善"],
+    id: "intro-support",
+    category: "draft",
+    title: "序論の書き方を相談する",
+    description: "問題提起、問い、構成予告を作るための質問文です。",
+    tags: ["序論", "問題提起", "導入"],
     fields: [
-      { id: "draft", label: "添削したい文章", type: "textarea", placeholder: "ここに文章を貼り付けます" },
-      { id: "purpose", label: "文章の目的", type: "input", placeholder: "例: レポート、メール、発表原稿、SNS投稿" },
-      { id: "focus", label: "特に見てほしい点", type: "textarea", placeholder: "例: 敬語、読みやすさ、説得力、誤字脱字" }
+      { id: "topic", label: "テーマ", type: "input", placeholder: "例: 大学生の生成AI利用" },
+      { id: "question", label: "問い", type: "textarea", placeholder: "例: 生成AIは大学生の学習にどのような影響を与えるのか" },
+      { id: "background", label: "背景として書きたいこと", type: "textarea", placeholder: "例: 生成AIが身近になり、授業や課題で使う学生が増えている" }
     ],
-    build: (v) => `次の文章を添削してください。
+    build: (v) => `${academicPolicy}
 ${v.tone}、${v.length}
 
-文章の目的: ${v.purpose}
-特に見てほしい点: ${v.focus}
+次の情報をもとに、レポートの序論を書くための考え方を教えてください。
+
+テーマ: ${v.topic}
+問い:
+${v.question}
+
+背景として書きたいこと:
+${v.background}
+
+出力してほしいこと:
+1. 序論に入れる要素
+2. 書き出しの方向性を3案
+3. 問いの示し方
+4. 本論へのつなげ方
+5. そのまま提出する文章ではなく、自分で書くための骨組み`
+  },
+  {
+    id: "body-support",
+    category: "draft",
+    title: "本論の根拠を組み立てる",
+    description: "主張、根拠、説明、資料の使い方を整えます。",
+    tags: ["本論", "根拠", "説明"],
+    fields: [
+      { id: "claim", label: "段落で言いたいこと", type: "textarea", placeholder: "例: 生成AIは理解を深める補助として使える" },
+      { id: "evidence", label: "使いたい根拠・資料", type: "textarea", placeholder: "例: 授業資料、アンケート結果、論文の要点" },
+      { id: "example", label: "具体例", type: "textarea", placeholder: "例: 分からない用語を質問して理解を確認する使い方" }
+    ],
+    build: (v) => `${academicPolicy}
+${v.tone}、${v.length}
+
+次の内容をもとに、本論の段落を組み立てる方法を教えてください。
+
+段落で言いたいこと:
+${v.claim}
+
+使いたい根拠・資料:
+${v.evidence}
+
+具体例:
+${v.example}
+
+出力してほしいこと:
+1. 主張、根拠、説明、まとめの順番
+2. 根拠の弱いところ
+3. 具体例を入れる位置
+4. 反対意見を入れるならどこか
+5. 自分で文章化するための段落メモ`
+  },
+  {
+    id: "conclusion-support",
+    category: "draft",
+    title: "結論を整理する",
+    description: "結論で何を言うか、主張を締める流れを作ります。",
+    tags: ["結論", "まとめ", "主張"],
+    fields: [
+      { id: "question", label: "レポートの問い", type: "textarea", placeholder: "例: 生成AIは大学生の学習にどのような影響を与えるのか" },
+      { id: "mainPoints", label: "本論で述べたこと", type: "textarea", placeholder: "例: メリット、リスク、使い方のルール" },
+      { id: "finalClaim", label: "最終的に言いたいこと", type: "textarea", placeholder: "例: 生成AIは補助として有効だが、考える過程を省かない使い方が必要" }
+    ],
+    build: (v) => `${academicPolicy}
+${v.tone}、${v.length}
+
+次の情報をもとに、レポートの結論を整理してください。
+
+レポートの問い:
+${v.question}
+
+本論で述べたこと:
+${v.mainPoints}
+
+最終的に言いたいこと:
+${v.finalClaim}
+
+出力してほしいこと:
+1. 結論に入れる順番
+2. 問いへの答え方
+3. 本論の要点のまとめ方
+4. 今後の課題を入れる場合の注意点
+5. 結論が弱く見える表現と改善案`
+  },
+  {
+    id: "report-proofread",
+    category: "revision",
+    title: "レポートを添削する",
+    description: "論理、読みやすさ、レポートらしさを確認します。",
+    tags: ["添削", "論理", "表現"],
+    fields: [
+      { id: "draft", label: "添削したい文章", type: "textarea", placeholder: "ここにレポート本文や段落を貼り付けます" },
+      { id: "rubric", label: "評価基準・先生の指示", type: "textarea", placeholder: "例: 授業内容を踏まえる、参考文献を2つ以上使う" },
+      { id: "concern", label: "不安な点", type: "textarea", placeholder: "例: 主張が弱い、文章が話し言葉っぽい、根拠が足りない" }
+    ],
+    build: (v) => `${academicPolicy}
+${v.tone}、${v.length}
+
+次のレポート文を添削してください。完成文の代筆ではなく、改善の方向と修正例を示してください。
 
 添削したい文章:
 ${v.draft}
 
-次の順番で答えてください。
-1. 修正後の文章
-2. 直した理由
-3. さらに良くするためのアドバイス`
+評価基準・先生の指示:
+${v.rubric}
+
+不安な点:
+${v.concern}
+
+出力してほしいこと:
+1. 良い点
+2. 論理が弱い箇所
+3. レポートらしくない表現
+4. 修正例
+5. 自分で直すためのチェックリスト`
   },
   {
-    id: "honorific",
-    category: "correction",
-    title: "文全体を敬語にする",
-    description: "カジュアルな文章を、失礼のない敬語に変えます。",
-    tags: ["敬語", "丁寧語", "ビジネス"],
+    id: "logic-check",
+    category: "revision",
+    title: "論理のつながりを確認する",
+    description: "主張と根拠がつながっているかを見ます。",
+    tags: ["論理", "主張", "根拠"],
     fields: [
-      { id: "casualText", label: "敬語にしたい文章", type: "textarea", placeholder: "例: 明日これ見てくれる？" },
-      { id: "recipient", label: "相手", type: "input", placeholder: "例: 先生、上司、取引先、お客様" },
-      { id: "scene", label: "使う場面", type: "input", placeholder: "例: メール、チャット、資料、口頭で伝える" }
+      { id: "claim", label: "主張", type: "textarea", placeholder: "例: 生成AIは学習理解を深める補助として使える" },
+      { id: "reasons", label: "理由・根拠", type: "textarea", placeholder: "例: 用語説明、要約、復習に使えるため" },
+      { id: "counter", label: "反対意見・不安点", type: "textarea", placeholder: "例: 依存すると自分で考えなくなる可能性がある" }
     ],
-    build: (v) => `次の文章全体を、自然で失礼のない敬語にしてください。
+    build: (v) => `${academicPolicy}
 ${v.tone}、${v.length}
 
-相手: ${v.recipient}
-使う場面: ${v.scene}
+次の主張と根拠のつながりを確認してください。
 
-元の文章:
-${v.casualText}
+主張:
+${v.claim}
 
-硬すぎる表現は避け、相手に伝わりやすい文章にしてください。
-必要であれば、より丁寧な版と少しやわらかい版の2案を出してください。`
+理由・根拠:
+${v.reasons}
+
+反対意見・不安点:
+${v.counter}
+
+出力してほしいこと:
+1. 主張と根拠がつながっているか
+2. 飛躍している部分
+3. 追加するとよい説明
+4. 反対意見への答え方
+5. より説得力のある主張への直し方`
   },
   {
-    id: "tone-change",
-    category: "correction",
-    title: "文章の印象を変える",
-    description: "同じ内容を、やわらかい・丁寧・説得力のある表現に変えます。",
-    tags: ["言い換え", "印象", "表現"],
+    id: "citation-check",
+    category: "citation",
+    title: "引用と参考文献を確認する",
+    description: "引用・要約・参考文献の扱いを確認します。",
+    tags: ["引用", "参考文献", "出典"],
     fields: [
-      { id: "text", label: "変えたい文章", type: "textarea", placeholder: "ここに文章を入力します" },
-      { id: "impression", label: "変えたい印象", type: "input", placeholder: "例: やわらかく、前向きに、説得力を出す" },
-      { id: "avoid", label: "避けたい表現", type: "input", placeholder: "例: きつい言い方、長すぎる文章、専門用語" }
+      { id: "source", label: "使いたい資料情報", type: "textarea", placeholder: "例: 著者、タイトル、URL、公開年、出版社など" },
+      { id: "useText", label: "レポート内で使いたい内容", type: "textarea", placeholder: "例: この調査では大学生のAI利用率が高いと述べられている" },
+      { id: "style", label: "指定された形式", type: "input", placeholder: "例: 指定なし、APA風、先生の指定フォーマット" }
     ],
-    build: (v) => `次の文章の意味は変えずに、印象を変えて書き直してください。
+    build: (v) => `${academicPolicy}
 ${v.tone}、${v.length}
 
-変えたい印象: ${v.impression}
-避けたい表現: ${v.avoid}
+次の資料をレポートで使うとき、引用・要約・参考文献の注意点を確認してください。
 
-元の文章:
-${v.text}
+使いたい資料情報:
+${v.source}
 
-書き直した文章を3案出し、それぞれの印象の違いも短く説明してください。`
+レポート内で使いたい内容:
+${v.useText}
+
+指定された形式: ${v.style}
+
+出力してほしいこと:
+1. 直接引用と要約のどちらが向いているか
+2. 引用するときの注意点
+3. 参考文献に必要な情報
+4. 不足している情報
+5. 形式は最終的に授業指示で確認すること`
   },
   {
-    id: "question",
-    category: "question",
-    title: "質問文を作る",
-    description: "わからないことをAIに聞きやすい形にします。",
-    tags: ["質問", "相談", "確認"],
+    id: "ai-use-disclosure",
+    category: "citation",
+    title: "AI利用を確認する",
+    description: "AIを使った範囲を、先生に説明できる形へ整理します。",
+    tags: ["AI利用", "提出前", "確認"],
     fields: [
-      { id: "problem", label: "困っていること", type: "textarea", placeholder: "例: レポートの書き出しが思いつかない" },
-      { id: "tried", label: "すでに試したこと", type: "textarea", placeholder: "例: テーマを調べた、メモを作った" }
+      { id: "usedFor", label: "AIを使った作業", type: "textarea", placeholder: "例: テーマ案、構成相談、文章の添削" },
+      { id: "notUsedFor", label: "自分で行った作業", type: "textarea", placeholder: "例: 資料を読んだ、主張を決めた、本文を書いた" },
+      { id: "rule", label: "授業のルール", type: "textarea", placeholder: "例: AI利用可、利用した場合は書く、明記なし" }
     ],
-    build: (v) => `次の困りごとについて相談に乗ってください。
+    build: (v) => `${academicPolicy}
 ${v.tone}、${v.length}
 
-困っていること:
-${v.problem}
+レポートでAIを使った範囲を、授業のルールに合わせて確認したいです。
 
-すでに試したこと:
-${v.tried}
+AIを使った作業:
+${v.usedFor}
 
-原因の整理、次に試すこと、具体例の順番で答えてください。`
-  },
-  {
-    id: "compare-question",
-    category: "question",
-    title: "比較して質問する",
-    description: "複数の選択肢を比べて、判断材料を出してもらいます。",
-    tags: ["比較", "選択", "判断"],
-    fields: [
-      { id: "options", label: "比べたいもの", type: "textarea", placeholder: "例: A案とB案、ExcelとGoogleスプレッドシート" },
-      { id: "criteria", label: "大事にしたい条件", type: "textarea", placeholder: "例: 初心者でも使いやすい、費用が少ない、短時間でできる" },
-      { id: "context", label: "状況", type: "textarea", placeholder: "例: 授業の発表で使う、チームで作業する" }
-    ],
-    build: (v) => `次の選択肢を比較して、どちらがよいか考える材料を出してください。
-${v.tone}、${v.length}
+自分で行った作業:
+${v.notUsedFor}
 
-比べたいもの:
-${v.options}
+授業のルール:
+${v.rule}
 
-大事にしたい条件:
-${v.criteria}
-
-状況:
-${v.context}
-
-表で比較し、最後におすすめと理由をわかりやすく書いてください。`
-  },
-  {
-    id: "step-question",
-    category: "question",
-    title: "手順を聞く",
-    description: "やりたいことを、順番に教えてもらう質問文を作ります。",
-    tags: ["手順", "やり方", "初心者"],
-    fields: [
-      { id: "goal", label: "やりたいこと", type: "input", placeholder: "例: Googleフォームでアンケートを作る" },
-      { id: "environment", label: "使っている環境", type: "input", placeholder: "例: Windows、スマホ、Excel、Google Chrome" },
-      { id: "experience", label: "自分の経験", type: "input", placeholder: "例: 初めて使う、少しだけ使ったことがある" }
-    ],
-    build: (v) => `${v.goal}のやり方を、初心者向けに順番に教えてください。
-${v.tone}、${v.length}
-
-使っている環境: ${v.environment}
-自分の経験: ${v.experience}
-
-最初に全体の流れを示し、そのあと1つずつ作業手順を書いてください。
-途中で失敗しやすいポイントも教えてください。`
-  },
-  {
-    id: "trouble-question",
-    category: "question",
-    title: "原因を相談する",
-    description: "うまくいかない原因と次に試すことを聞きます。",
-    tags: ["困りごと", "原因", "解決"],
-    fields: [
-      { id: "issue", label: "起きている問題", type: "textarea", placeholder: "例: コピーした文章の改行が崩れる" },
-      { id: "when", label: "いつ起きるか", type: "input", placeholder: "例: 保存したあと、送信したあと、スマホで見たとき" },
-      { id: "tried", label: "試したこと", type: "textarea", placeholder: "例: ブラウザを変えた、再読み込みした" }
-    ],
-    build: (v) => `次の問題の原因と解決方法を一緒に考えてください。
-${v.tone}、${v.length}
-
-起きている問題:
-${v.issue}
-
-いつ起きるか: ${v.when}
-
-試したこと:
-${v.tried}
-
-考えられる原因を3つ挙げ、確認方法と次に試すことを順番に教えてください。`
+出力してほしいこと:
+1. AI利用として明記した方がよい範囲
+2. 自分の作業として説明できる範囲
+3. 先生に確認すべき点
+4. AI利用の説明文の例
+5. ルールが不明な場合の安全な対応`
   }
 ];
 
@@ -380,8 +511,8 @@ function renderFields() {
     block.className = "field-block";
     const inputTag = field.type === "textarea" ? "textarea" : "input";
     block.innerHTML = `
-      <span class="field-label">${field.label}</span>
-      <${inputTag} class="text-field" data-field="${field.id}" placeholder="${field.placeholder || ""}"></${inputTag}>
+      <span class="field-label">${escapeHtml(field.label)}</span>
+      <${inputTag} class="text-field" data-field="${escapeHtml(field.id)}" placeholder="${escapeHtml(field.placeholder || "")}"></${inputTag}>
     `;
     dynamicFields.append(block);
   });
@@ -515,13 +646,14 @@ function buildCustomPrompt(template, values) {
     .map((field) => `${field.label}: ${values[field.id] || "未入力"}`)
     .join("\n");
 
-  return `${template.instruction}
+  return `${academicPolicy}
+${template.instruction}
 ${values.tone}、${values.length}
 
 入力内容:
 ${filledFields}
 
-目的に合わせて、読みやすく使いやすい形で答えてください。`;
+レポート作成に使いやすい形で、考え方、確認点、次に自分が行う作業を示してください。`;
 }
 
 function deleteCustomTemplate(id) {

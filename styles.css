@@ -114,6 +114,20 @@ h3 {
   gap: 8px;
 }
 
+.policy-card {
+  border: 1px solid rgba(47, 143, 131, 0.24);
+  border-radius: 8px;
+  background: #ffffff;
+  padding: 12px;
+}
+
+.policy-card p:last-child {
+  margin: 0;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.65;
+}
+
 .custom-template-form {
   display: grid;
   gap: 10px;
