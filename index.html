@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>AI文章メーカー</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <main class="app-shell">
+      <section class="workspace" aria-label="AI向け文章作成ツール">
+        <aside class="sidebar">
+          <div class="brand">
+            <img src="./assets/mark.svg" alt="" class="brand-mark" />
+            <div>
+              <p class="eyebrow">AI補助ツール</p>
+              <h1>AI文章メーカー</h1>
+            </div>
+          </div>
+
+          <div class="panel">
+            <label class="field-label" for="templateSearch">テンプレート検索</label>
+            <input id="templateSearch" class="search-input" type="search" placeholder="例: メール、要約、企画" />
+          </div>
+
+          <nav class="category-list" aria-label="カテゴリ">
+            <button class="category-button is-active" type="button" data-category="all">すべて</button>
+            <button class="category-button" type="button" data-category="writing">文章作成</button>
+            <button class="category-button" type="button" data-category="correction">添削・敬語</button>
+            <button class="category-button" type="button" data-category="question">質問</button>
+            <button class="category-button" type="button" data-category="study">学習</button>
+            <button class="category-button" type="button" data-category="work">仕事</button>
+            <button class="category-button" type="button" data-category="idea">アイデア</button>
+          </nav>
+        </aside>
+
+        <section class="template-column" aria-label="テンプレート一覧">
+          <div class="section-heading">
+            <p class="eyebrow">Step 1</p>
+            <h2>用途を選ぶ</h2>
+          </div>
+          <div id="templateList" class="template-list"></div>
+        </section>
+
+        <section class="builder-column" aria-label="文章作成フォーム">
+          <div class="section-heading">
+            <p class="eyebrow">Step 2</p>
+            <h2 id="selectedTitle">文章を整える</h2>
+          </div>
+
+          <form id="promptForm" class="builder-form">
+            <div class="control-grid">
+              <label class="select-wrap">
+                <span class="field-label">話し方</span>
+                <select id="toneSelect">
+                  <option value="やさしく、初心者にもわかる言葉で">やさしい</option>
+                  <option value="ていねいで信頼感のある表現で">ていねい</option>
+                  <option value="短く、要点だけが伝わる表現で">短め</option>
+                  <option value="明るく前向きな表現で">明るい</option>
+                </select>
+              </label>
+
+              <label class="select-wrap">
+                <span class="field-label">仕上がり</span>
+                <select id="lengthSelect">
+                  <option value="必要な情報を過不足なく入れてください">標準</option>
+                  <option value="3行程度で簡潔にまとめてください">短く</option>
+                  <option value="背景、理由、具体例も含めて詳しく書いてください">詳しく</option>
+                </select>
+              </label>
+            </div>
+
+            <div id="dynamicFields" class="dynamic-fields"></div>
+          </form>
+
+          <div class="output-panel">
+            <div class="output-header">
+              <div>
+                <p class="eyebrow">Step 3</p>
+                <h2>AIに送る文章</h2>
+              </div>
+              <div class="actions">
+                <button id="copyButton" class="icon-button" type="button" title="コピー" aria-label="コピー">
+                  <span aria-hidden="true">⧉</span>
+                </button>
+                <button id="clearButton" class="icon-button" type="button" title="入力を消す" aria-label="入力を消す">
+                  <span aria-hidden="true">×</span>
+                </button>
+              </div>
+            </div>
+            <textarea id="promptOutput" class="prompt-output" readonly></textarea>
+            <p id="copyStatus" class="copy-status" role="status" aria-live="polite"></p>
+          </div>
+        </section>
+      </section>
+    </main>
+
+    <script src="./script.js"></script>
+  </body>
+</html>
