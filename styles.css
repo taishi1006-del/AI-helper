@@ -128,13 +128,6 @@ h3 {
   line-height: 1.65;
 }
 
-.custom-template-form {
-  display: grid;
-  gap: 10px;
-  border-top: 1px solid var(--line);
-  padding-top: 18px;
-}
-
 .field-label {
   display: block;
   color: var(--muted);
@@ -334,57 +327,6 @@ textarea.text-field {
   color: var(--muted);
   font-size: 12px;
   line-height: 1.5;
-}
-
-.compact-textarea {
-  min-height: 72px;
-}
-
-.primary-button {
-  min-height: 42px;
-  border: 0;
-  border-radius: 8px;
-  background: var(--mint);
-  color: #ffffff;
-  font-weight: 700;
-}
-
-.primary-button:hover {
-  background: var(--mint-dark);
-}
-
-.custom-status {
-  min-height: 20px;
-  margin: 0;
-  color: var(--mint-dark);
-  font-size: 12px;
-  font-weight: 700;
-  line-height: 1.5;
-}
-
-.template-card-header {
-  display: flex;
-  align-items: start;
-  justify-content: space-between;
-  gap: 8px;
-}
-
-.delete-template-button {
-  flex: 0 0 auto;
-  display: grid;
-  place-items: center;
-  width: 30px;
-  height: 30px;
-  border: 1px solid var(--line);
-  border-radius: 8px;
-  background: #ffffff;
-  color: var(--coral);
-  font-size: 18px;
-  line-height: 1;
-}
-
-.delete-template-button:hover {
-  border-color: var(--coral);
 }
 
 .output-panel {

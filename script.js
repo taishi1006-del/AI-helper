@@ -856,13 +856,10 @@ ${v.need}
   }
 ];
 
-const customTemplateStorageKey = "ai-helper-custom-templates";
-
 const state = {
   selectedId: builtInTemplates[0].id,
   category: "all",
-  query: "",
-  customTemplates: loadCustomTemplates()
+  query: ""
 };
 
 const templateList = document.querySelector("#templateList");
@@ -873,29 +870,9 @@ const toneSelect = document.querySelector("#toneSelect");
 const lengthSelect = document.querySelector("#lengthSelect");
 const searchInput = document.querySelector("#templateSearch");
 const copyStatus = document.querySelector("#copyStatus");
-const customTemplateForm = document.querySelector("#customTemplateForm");
-const customTitle = document.querySelector("#customTitle");
-const customDescription = document.querySelector("#customDescription");
-const customFields = document.querySelector("#customFields");
-const customInstruction = document.querySelector("#customInstruction");
-const customStatus = document.querySelector("#customStatus");
-
-function loadCustomTemplates() {
-  try {
-    const saved = JSON.parse(localStorage.getItem(customTemplateStorageKey) || "[]");
-    if (!Array.isArray(saved)) return [];
-    return saved.filter((template) => template && template.id && template.title && Array.isArray(template.fields));
-  } catch {
-    return [];
-  }
-}
-
-function saveCustomTemplates() {
-  localStorage.setItem(customTemplateStorageKey, JSON.stringify(state.customTemplates));
-}
 
 function getTemplates() {
-  return [...builtInTemplates, ...state.customTemplates];
+  return builtInTemplates;
 }
 
 function escapeHtml(value) {
@@ -937,10 +914,7 @@ function renderTemplates() {
     button.className = `template-card${template.id === state.selectedId ? " is-active" : ""}`;
     button.dataset.templateId = template.id;
     button.innerHTML = `
-      <span class="template-card-header">
-        <h3>${safeTitle}</h3>
-        ${template.isCustom ? `<span class="delete-template-button" data-delete-template="${escapeHtml(template.id)}" title="削除" aria-label="${safeTitle}を削除">×</span>` : ""}
-      </span>
+      <h3>${safeTitle}</h3>
       <p>${safeDescription}</p>
       <span class="tag-row">${template.tags.map((tag) => `<span class="tag">${escapeHtml(tag)}</span>`).join("")}</span>
     `;
@@ -1013,13 +987,6 @@ function selectTemplate(id) {
 }
 
 templateList.addEventListener("click", (event) => {
-  const deleteButton = event.target.closest("[data-delete-template]");
-  if (deleteButton) {
-    event.stopPropagation();
-    deleteCustomTemplate(deleteButton.dataset.deleteTemplate);
-    return;
-  }
-
   const card = event.target.closest("[data-template-id]");
   if (!card) return;
   selectTemplate(card.dataset.templateId);
@@ -1103,93 +1070,6 @@ function resetImagePreviews() {
     preview.innerHTML = "<span>画像を選ぶとここにプレビューが表示されます。</span>";
   });
 }
-
-customTemplateForm.addEventListener("submit", (event) => {
-  event.preventDefault();
-
-  const title = customTitle.value.trim();
-  const description = customDescription.value.trim();
-  const instruction = customInstruction.value.trim();
-  const fieldNames = customFields.value
-    .split(/\r?\n/)
-    .map((field) => field.trim())
-    .filter(Boolean);
-
-  if (!title || !instruction || fieldNames.length === 0) {
-    customStatus.textContent = "名前、入力欄名、指示文を入力してください。";
-    return;
-  }
-
-  const id = `custom-${Date.now()}`;
-  const fields = fieldNames.map((label, index) => ({
-    id: `customField${index + 1}`,
-    label,
-    type: "textarea",
-    placeholder: `${label}を入力します`
-  }));
-
-  const customTemplate = {
-    id,
-    category: "custom",
-    title,
-    description: description || "自分で作ったテンプレートです。",
-    tags: ["自作", "保存済み"],
-    fields,
-    instruction,
-    isCustom: true,
-    build: (v) => buildCustomPrompt(customTemplate, v)
-  };
-
-  state.customTemplates.push(customTemplate);
-  saveCustomTemplates();
-  customTemplateForm.reset();
-  customStatus.textContent = "保存しました。自作カテゴリから使えます。";
-  state.category = "custom";
-  document.querySelectorAll("[data-category]").forEach((item) => {
-    item.classList.toggle("is-active", item.dataset.category === "custom");
-  });
-  selectTemplate(id);
-});
-
-function buildCustomPrompt(template, values) {
-  const filledFields = template.fields
-    .map((field) => `${field.label}: ${values[field.id] || "未入力"}`)
-    .join("\n");
-
-  return `${academicPolicy}
-${template.instruction}
-${values.tone}、${values.length}
-
-入力内容:
-${filledFields}
-
-レポート作成に使いやすい形で、考え方、確認点、次に自分が行う作業を示してください。`;
-}
-
-function deleteCustomTemplate(id) {
-  const target = state.customTemplates.find((template) => template.id === id);
-  if (!target) return;
-
-  const canDelete = window.confirm(`「${target.title}」を削除しますか？`);
-  if (!canDelete) return;
-
-  state.customTemplates = state.customTemplates.filter((template) => template.id !== id);
-  saveCustomTemplates();
-
-  if (state.selectedId === id) {
-    state.selectedId = builtInTemplates[0].id;
-  }
-
-  renderTemplates();
-  renderFields();
-  updateOutput();
-  customStatus.textContent = "削除しました。";
-}
-
-state.customTemplates = state.customTemplates.map((template) => ({
-  ...template,
-  build: (v) => buildCustomPrompt(template, v)
-}));
 
 renderTemplates();
 renderFields();

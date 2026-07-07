@@ -35,38 +35,7 @@
             <button class="category-button" type="button" data-category="write">書く</button>
             <button class="category-button" type="button" data-category="review">見直す</button>
             <button class="category-button" type="button" data-category="image">画像</button>
-            <button class="category-button" type="button" data-category="custom">自作</button>
           </nav>
-
-          <form id="customTemplateForm" class="custom-template-form">
-            <div>
-              <p class="eyebrow">My Template</p>
-              <h2>自作テンプレート</h2>
-            </div>
-
-            <label class="field-block">
-              <span class="field-label">テンプレート名</span>
-              <input id="customTitle" class="text-field" type="text" placeholder="例: 資料比較メモ" />
-            </label>
-
-            <label class="field-block">
-              <span class="field-label">説明</span>
-              <input id="customDescription" class="text-field" type="text" placeholder="例: 複数資料の違いを整理する" />
-            </label>
-
-            <label class="field-block">
-              <span class="field-label">入力欄名</span>
-              <textarea id="customFields" class="text-field compact-textarea" placeholder="例: レポートテーマ&#10;資料Aの要点&#10;資料Bの要点"></textarea>
-            </label>
-
-            <label class="field-block">
-              <span class="field-label">AIへの指示文</span>
-              <textarea id="customInstruction" class="text-field compact-textarea" placeholder="例: 次の資料メモを比較し、レポートに使える論点を整理してください。"></textarea>
-            </label>
-
-            <button class="primary-button" type="submit">保存</button>
-            <p id="customStatus" class="custom-status" role="status" aria-live="polite"></p>
-          </form>
         </aside>
 
         <section class="template-column" aria-label="テンプレート一覧">
